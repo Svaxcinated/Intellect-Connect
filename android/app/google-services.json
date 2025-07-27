@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "122662345955",
+    "project_id": "intellect-connect-3d9fc",
+    "storage_bucket": "intellect-connect-3d9fc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:122662345955:android:74e9412e728dd079f0b9d6",
+        "android_client_info": {
+          "package_name": "com.example.intellectconnect"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "122662345955-u06ef02uf17ft9p17jg8v22cikpdobsh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.intellectconnect",
+            "certificate_hash": "2f688a84208fd6f42f905a76573946e0d9ff873c"
+          }
+        },
+        {
+          "client_id": "122662345955-c3f0rmhv8hvb3ok5vva0jn8g5oq4jne6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCkzTVLMb1CwiVPA8QyPLOsgKe3IeAY1Oo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "122662345955-c3f0rmhv8hvb3ok5vva0jn8g5oq4jne6.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "122662345955-bfo07c87avqs2pjcaec6nm8jue5mi9sp.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.myFlutterApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

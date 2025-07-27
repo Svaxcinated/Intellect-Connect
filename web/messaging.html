@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Messaging</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #F9FAF9;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background-color: white;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #6BA17B;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-input {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 150px;
+        }
+
+        .login-btn {
+            background-color: #6BA17B;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .login-btn:hover {
+            background-color: #5a8f6a;
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            background-color: white;
+            border-radius: 8px;
+            margin: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            max-height: 60vh;
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .message.own {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #6BA17B;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 0.75rem 1rem;
+            border-radius: 20px;
+            position: relative;
+        }
+
+        .message.own .message-content {
+            background-color: #6BA17B;
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message:not(.own) .message-content {
+            background-color: #f5f5f5;
+            color: #333;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message-sender {
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #6BA17B;
+            margin-bottom: 0.25rem;
+        }
+
+        .message-text {
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 0.25rem;
+        }
+
+        .input-container {
+            padding: 1rem;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        .message-input:focus {
+            border-color: #6BA17B;
+        }
+
+        .send-btn {
+            background-color: #6BA17B;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .send-btn:hover {
+            background-color: #5a8f6a;
+        }
+
+        .send-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .status {
+            text-align: center;
+            padding: 1rem;
+            color: #666;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #6BA17B;
+        }
+
+        .error {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 1rem;
+            margin: 1rem;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                margin: 0.5rem;
+                border-radius: 0;
+            }
+            
+            .header {
+                padding: 0.75rem;
+            }
+            
+            .user-input {
+                width: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Real-time Messaging</h1>
+        <div class="user-info">
+            <input type="text" id="userName" class="user-input" placeholder="Enter your name">
+            <button id="loginBtn" class="login-btn">Login</button>
+        </div>
+    </div>
+
+    <div id="status" class="status">Please login to start messaging</div>
+
+    <div id="chatContainer" class="chat-container" style="display: none;">
+        <div id="messages" class="messages">
+            <div class="loading">Loading messages...</div>
+        </div>
+        <div class="input-container">
+            <input type="text" id="messageInput" class="message-input" placeholder="Type a message..." disabled>
+            <button id="sendBtn" class="send-btn" disabled>➤</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Firebase configuration - Replace with your actual Firebase config
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let currentUser = null;
+        let messagesListener = null;
+
+        // DOM elements
+        const userNameInput = document.getElementById('userName');
+        const loginBtn = document.getElementById('loginBtn');
+        const status = document.getElementById('status');
+        const chatContainer = document.getElementById('chatContainer');
+        const messages = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+
+        // Login functionality
+        loginBtn.addEventListener('click', () => {
+            const userName = userNameInput.value.trim();
+            if (userName) {
+                currentUser = {
+                    id: 'web_' + Date.now(),
+                    name: userName
+                };
+                login();
+            } else {
+                alert('Please enter your name');
+            }
+        });
+
+        // Send message functionality
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        function login() {
+            status.textContent = `Logged in as ${currentUser.name}`;
+            chatContainer.style.display = 'flex';
+            messageInput.disabled = false;
+            sendBtn.disabled = false;
+            loadMessages();
+        }
+
+        function loadMessages() {
+            messages.innerHTML = '<div class="loading">Loading messages...</div>';
+            
+            messagesListener = db.collection('messages')
+                .orderBy('timestamp', 'asc')
+                .onSnapshot((snapshot) => {
+                    messages.innerHTML = '';
+                    
+                    snapshot.forEach((doc) => {
+                        const messageData = doc.data();
+                        const messageElement = createMessageElement(messageData);
+                        messages.appendChild(messageElement);
+                    });
+                    
+                    scrollToBottom();
+                }, (error) => {
+                    console.error('Error loading messages:', error);
+                    messages.innerHTML = '<div class="error">Error loading messages</div>';
+                });
+        }
+
+        function createMessageElement(messageData) {
+            const messageDiv = document.createElement('div');
+            const isOwnMessage = messageData.senderId === currentUser.id;
+            
+            messageDiv.className = `message ${isOwnMessage ? 'own' : ''}`;
+            
+            const timestamp = messageData.timestamp ? 
+                new Date(messageData.timestamp.toDate()).toLocaleTimeString() : 
+                'Just now';
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">
+                    ${(messageData.senderName || 'User')[0].toUpperCase()}
+                </div>
+                <div class="message-content">
+                    ${!isOwnMessage ? `<div class="message-sender">${messageData.senderName || 'User'}</div>` : ''}
+                    <div class="message-text">${messageData.text || ''}</div>
+                    <div class="message-time">${timestamp}</div>
+                </div>
+            `;
+            
+            return messageDiv;
+        }
+
+        function sendMessage() {
+            const messageText = messageInput.value.trim();
+            if (!messageText || !currentUser) return;
+
+            const messageData = {
+                text: messageText,
+                senderId: currentUser.id,
+                senderName: currentUser.name,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                type: 'text'
+            };
+
+            db.collection('messages').add(messageData)
+                .then(() => {
+                    messageInput.value = '';
+                })
+                .catch((error) => {
+                    console.error('Error sending message:', error);
+                    alert('Error sending message');
+                });
+        }
+
+        function scrollToBottom() {
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        // Auto-scroll to bottom when new messages arrive
+        const messagesObserver = new MutationObserver(scrollToBottom);
+        messagesObserver.observe(messages, { childList: true });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (messagesListener) {
+                messagesListener();
+            }
+        });
+    </script>
+</body>
+</html> 
